@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1169</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>PyTrader</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_5">
+    <item>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_sec1">
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;BTC/USD&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_sec1_ask">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="minimum">
+         <double>0.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>100000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_sec1_bid">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="maximum">
+         <double>100000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="label_sec2">
+        <property name="text">
+         <string>LTC/BTC</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_sec2_ask">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="maximum">
+         <double>100000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_sec2_bid">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="maximum">
+         <double>100000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QLabel" name="label_sec3">
+        <property name="text">
+         <string>LTC/USD</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_sec2_askAmount">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="maximum">
+         <double>99999.990000000005239</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_sec3_ask">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="maximum">
+         <double>100000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="4">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_sec3_bid">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="maximum">
+         <double>100000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_sec1_askAmount">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="maximum">
+         <double>99999.990000000005239</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_sec1_bidAmount">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="maximum">
+         <double>99999.990000000005239</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_sec2_bidAmount">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="maximum">
+         <double>99999.990000000005239</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="5">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_sec3_askAmount">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="maximum">
+         <double>99999.990000000005239</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="5">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_sec3_bidAmount">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="maximum">
+         <double>99999.990000000005239</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label_result">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QTableView" name="tableView_history">
+      <attribute name="verticalHeaderVisible">
+       <bool>false</bool>
+      </attribute>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_pause">
+        <property name="text">
+         <string>Pause / resume</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="text">
+         <string>Exit</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1169</width>
+     <height>25</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>400</x>
+     <y>481</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
