@@ -1,62 +1,20 @@
 import sys
-import PySide
-import ui_mainwindow
 from PySide import QtGui
 from PySide import QtCore
-import btceapi
+import bitfinex
+import ui_mainwindow
+#import btceapi
 
 epsilon = 0.0000001
-TradeMode = False
 
 
 def getTopOfTheBook(symbol):
-  asks, bids = btceapi.getDepth(symbol)
+  d = bitfinex.book({'limit_bids':5, 'limit_asks':5}, symbol)
+  bids = d['bids']
+  asks = d['asks']
   #return (float(asks[1][0]), float(asks[0][1] + asks[1][1]), float(bids[1][0]), float(bids[0][1] + bids[1][1]))
-  return (float(asks[0][0]), float(asks[0][1]), float(bids[0][0]), float(bids[0][1]))
-  
-def getTopOfTheBook2(symbol):
-  asks, bids = btceapi.getDepth(symbol)
-  return (float(asks[1][0]), float(asks[0][1] + asks[1][1]), float(bids[1][0]), float(bids[0][1] + bids[1][1]))
-  
-def getTopOfTheBook3(symbol):
-  asks, bids = btceapi.getDepth(symbol)
-  return (float(asks[2][0]), float(asks[0][1] + asks[1][1] + asks[2][1]), float(bids[2][0]), float(bids[0][1] + bids[1][1] + bids[2][1]))
-
-def getTopOfTheBookMinSum(symbol, s):
-  asks, bids = btceapi.getDepth(symbol)
-  askDepth = 0
-  bidDepth = 0
-  ask, askAmount, bid, bidAmount = float(asks[0][0]), float(asks[0][1]), float(bids[0][0]), float(bids[0][1])
-  askSum = ask * askAmount
-  bidSum = bid * bidAmount
-  while(askSum < s):
-    askDepth = askDepth + 1
-    askSum = askSum + float(asks[askDepth][0]) * float(asks[askDepth][1])
-    ask = float(asks[askDepth][0])
-    askAmount = askAmount + float(asks[askDepth][1])
-  while(bidSum < s):
-    bidDepth = bidDepth + 1
-    bidSum = bidSum + float(bids[bidDepth][0]) * float(bids[bidDepth][1])
-    bid = float(bids[bidDepth][0])
-    bidAmount = bidAmount + float(bids[bidDepth][1])
-  return ask, askAmount, bid, bidAmount
-  
-def getTopOfTheBookMinAmount(symbol, minAskAmount, minBidAmount):
-  asks, bids = btceapi.getDepth(symbol)
-  askDepth = 0
-  bidDepth = 0
-  ask, askAmount, bid, bidAmount = float(asks[0][0]), float(asks[0][1]), float(bids[0][0]), float(bids[0][1])
-  while(askAmount < minAskAmount):
-    askDepth = askDepth + 1
-    ask = float(asks[askDepth][0])
-    askAmount = askAmount + float(asks[askDepth][1])
-  while(bidAmount < minBidAmount):
-    bidDepth = bidDepth + 1
-    bid = float(bids[bidDepth][0])
-    bidAmount = bidAmount + float(bids[bidDepth][1])
-  return ask, askAmount, bid, bidAmount
-
-  
+  return (float(asks[0]['price']), float(asks[0]['amount']), float(bids[0]['price']), float(bids[0]['amount']))
+    
 def refreshPairData(top, spinBox1, spinBox2, spinBox3, spinBox4):
   spinBox1.setValue(top[0])
   spinBox2.setValue(top[2])
@@ -64,9 +22,9 @@ def refreshPairData(top, spinBox1, spinBox2, spinBox3, spinBox4):
   spinBox4.setValue(top[3])
   return
 
-p1 = "btc_usd"
-p2 = "ltc_btc"
-p3 = "ltc_usd"
+p1 = "btcusd"
+p2 = "ltcbtc"
+p3 = "ltcusd"
 
 def formatBTC(amount):
   return float(int(amount*100))/100
@@ -282,7 +240,7 @@ class Listener(QtCore.QObject):
     
     self.top1 = getTopOfTheBook(p1)
     self.top2 = getTopOfTheBook(p2)
-    self.top3 = getTopOfTheBookMinAmount(p3, float(btceapi.min_orders[p1])/self.top2[0], float(btceapi.min_orders[p1])/self.top2[2])
+    self.top3 = getTopOfTheBook(p3)
     a1, b1 = self.top1[0], self.top1[2]
     a2, b2 = self.top2[0], self.top2[2]
     a3, b3 = self.top3[0], self.top3[2]
@@ -294,10 +252,12 @@ class Listener(QtCore.QObject):
       content.doubleSpinBox_sec3_askAmount, content.doubleSpinBox_sec3_bidAmount)
     profit1 = k3 * float(b3) / (float(a1) * float(a2))  - 1.0
     profit2 = k3 * float(b1) * float(b2) / float(a3)  - 1.0
-    if profit1 > 0 and TradeMode:
-      self.tradeForward()
-    elif profit2 > 0 and TradeMode:
-      self.tradeBackward()
+    if profit1 > 0:
+      pass
+      #self.tradeForward()
+    elif profit2 > 0:
+      pass
+      #self.tradeBackward()
     self.maxProfit = max(self.maxProfit, profit1, profit2)
     content.label_result.setText('profit1 = ' + str(profit1 * 100) + '%\nprofit2 = ' + str(profit2 * 100) + '%\n' + "maxProfit = " + str(self.maxProfit * 100) + "%")
   @QtCore.Slot()
@@ -342,10 +302,8 @@ model.setHorizontalHeaderLabels(["Time",
       "USD profit"])
      
 key_file = "keyfile.txt"
-with btceapi.KeyHandler(key_file, resaveOnDeletion=True) as handler:
-  key = handler.getKeys()[0]
-  tradeAPI = btceapi.TradeAPI(key, handler=handler)
-  listener = Listener(model, timer, tradeAPI)
+with bitfinex.Bitfinex() as handler:
+  listener = Listener(model, timer, handler)
 
   content.tableView_history.setModel(model)
   content.tableView_history.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
