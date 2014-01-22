@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Sun Jan 12 21:57:35 2014
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Thu Jan 23 00:48:41 2014
+#      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -117,6 +126,19 @@ class Ui_MainWindow(object):
         self.label_result = QtGui.QLabel(self.centralwidget)
         self.label_result.setObjectName(_fromUtf8("label_result"))
         self.horizontalLayout.addWidget(self.label_result)
+        self.horizontalLayout_4 = QtGui.QHBoxLayout()
+        self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_4.addItem(spacerItem)
+        self.label_lag = QtGui.QLabel(self.centralwidget)
+        self.label_lag.setObjectName(_fromUtf8("label_lag"))
+        self.horizontalLayout_4.addWidget(self.label_lag)
+        self.spinBox_lag = QtGui.QSpinBox(self.centralwidget)
+        self.spinBox_lag.setReadOnly(True)
+        self.spinBox_lag.setMaximum(100000)
+        self.spinBox_lag.setObjectName(_fromUtf8("spinBox_lag"))
+        self.horizontalLayout_4.addWidget(self.spinBox_lag)
+        self.horizontalLayout.addLayout(self.horizontalLayout_4)
         self.verticalLayout_5.addLayout(self.horizontalLayout)
         self.tableView_history = QtGui.QTableView(self.centralwidget)
         self.tableView_history.setObjectName(_fromUtf8("tableView_history"))
@@ -124,16 +146,16 @@ class Ui_MainWindow(object):
         self.verticalLayout_5.addWidget(self.tableView_history)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_2.addItem(spacerItem)
+        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem1)
         self.pushButton_pause = QtGui.QPushButton(self.centralwidget)
         self.pushButton_pause.setObjectName(_fromUtf8("pushButton_pause"))
         self.horizontalLayout_2.addWidget(self.pushButton_pause)
         self.pushButton = QtGui.QPushButton(self.centralwidget)
         self.pushButton.setObjectName(_fromUtf8("pushButton"))
         self.horizontalLayout_2.addWidget(self.pushButton)
-        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_2.addItem(spacerItem1)
+        spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem2)
         self.verticalLayout_5.addLayout(self.horizontalLayout_2)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -149,11 +171,12 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "PyTrader", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_sec1.setText(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p>BTC/USD</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_sec2.setText(QtGui.QApplication.translate("MainWindow", "LTC/BTC", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_sec3.setText(QtGui.QApplication.translate("MainWindow", "LTC/USD", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_result.setText(QtGui.QApplication.translate("MainWindow", "TextLabel", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_pause.setText(QtGui.QApplication.translate("MainWindow", "Pause / resume", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
+        MainWindow.setWindowTitle(_translate("MainWindow", "PyTrader", None))
+        self.label_sec1.setText(_translate("MainWindow", "<html><head/><body><p>BTC/USD</p></body></html>", None))
+        self.label_sec2.setText(_translate("MainWindow", "LTC/BTC", None))
+        self.label_sec3.setText(_translate("MainWindow", "LTC/USD", None))
+        self.label_result.setText(_translate("MainWindow", "TextLabel", None))
+        self.label_lag.setText(_translate("MainWindow", "API lag", None))
+        self.pushButton_pause.setText(_translate("MainWindow", "Pause / resume", None))
+        self.pushButton.setText(_translate("MainWindow", "Exit", None))
 

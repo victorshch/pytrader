@@ -1,15 +1,18 @@
 import sys
 import decimal
 from decimal import Decimal
+from concurrent import futures
 
 import btceapi
 import bitfinex
 
-
 class AbstractTradeApi(object):
   def __init__(self):
     self.orderQueue = []
-    
+  
+  def Name(self):
+    return ''
+  
   #Fee (%)
   def Comission(self):
     return Decimal('0.0')
@@ -17,13 +20,17 @@ class AbstractTradeApi(object):
   def GetDepth(self, pair, askLimit = 50, bidLimit = 50):
     pass
   
-  def QueueOrder(self, pair, orderType, price, amount):
-    #TODO
+  def GetDepths(self, pairList, askLimit = 50, bidLimit = 50, maxWorkers = 5):
+    with futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
+      return dict(executor.map(lambda pair: (pair, self.GetDepth(pair, askLimit, bidLimit)), pairList))
+  
+  def GetBalance(self, symbolList):
     pass
   
-  def PlacePendingOrders(self):
+  def PlaceOrder(self, pair, orderType, price, amount):
     #TODO
     pass
+
 
 class Pairs:
   btcusd = 'btcusd'
@@ -33,11 +40,14 @@ class Pairs:
 class BTCETradeApi(AbstractTradeApi):
   btcePairs = { 'btcusd':'btc_usd', 'ltcbtc':'ltc_btc', 'ltcusd':'ltc_usd' }
   
-  def __init__(self, key_file, nonce=1):
+  def __init__(self, key_file):
     self.key_file = key_file
     self.handler = btceapi.KeyHandler(key_file, resaveOnDeletion=True)
     key = self.handler.getKeys()[0]
     self.tradeapi = btceapi.TradeAPI(key, handler=self.handler)
+  
+  def Name(self):
+    return "BTC-e"
   
   #Fee (%)
   def Comission(self):
@@ -55,6 +65,10 @@ class BTCETradeApi(AbstractTradeApi):
             
     return result
   
+  def GetBalance(self, symbolList):
+    info = btceapi.getInfo()
+    return { s : getattr(info, 'balance_'+s) for s in symbolList }
+  
   def __enter__(self):
     return self
 
@@ -66,9 +80,12 @@ class BTCETradeApi(AbstractTradeApi):
     
 class BitfinexTradeApi(AbstractTradeApi):
   
-  def __init__(self):
+  def __init__(self, keyfile):
     self.tradeapi = bitfinex.Bitfinex()
-    
+  
+  def Name(self):
+    return "Bitfinex"
+  
   def Comission(self):
     #todo
     return Decimal('0.15')
@@ -81,8 +98,16 @@ class BitfinexTradeApi(AbstractTradeApi):
     #print r
     
     result = { \
-      'ask' : [{ 'price' : e[u'price'], 'amount' : e[u'amount'] } for e in r[u'asks']], \
-      'bid' : [{ 'price' : e[u'price'], 'amount' : e[u'amount'] } for e in r[u'bids']]  \
+      'ask' : [{ 'price' : e[u'price'], 'amount' : e[u'amount'] } for e in r['asks']], \
+      'bid' : [{ 'price' : e[u'price'], 'amount' : e[u'amount'] } for e in r['bids']]  \
       }
     
     return result
+    
+def CreateTradeApi(exchangeName, keyfile):
+  if exchangeName.lower() == 'btce' or exchangeName.lower() == 'btc-e':
+    return BTCETradeApi(keyfile)
+  elif exchangeName.lower() == 'bitfinex':
+    return BitfinexTradeApi(keyfile)
+  else:
+    return None

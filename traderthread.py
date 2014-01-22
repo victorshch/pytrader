@@ -34,9 +34,11 @@ class Balance(object):
 
 class TraderThread(QtCore.QThread):
   timer = QtCore.QTimer()
+  stopwatch = QtCore.QTime()
   tradeTimer = QtCore.QTimer()
   updateData = pyqtSignal(Tops, ArbData, ArbData)
-  def __init__(self, parent, tradeAPI, p1='btcusd', p2='ltcbtc', p3 = 'ltcusd', refreshInterval=500, tradeInterval=15000):
+  updateLag = pyqtSignal(int)
+  def __init__(self, parent, tradeAPI, p1='btcusd', p2='ltcbtc', p3 = 'ltcusd', refreshInterval=900, tradeInterval=15000):
     super(TraderThread, self).__init__(parent)
     self.tradeAPI = tradeAPI
     self.k = Decimal('1') - (tradeAPI.Comission() / Decimal('100.0'))
@@ -51,7 +53,12 @@ class TraderThread(QtCore.QThread):
 
   @pyqtSlot()
   def onTimer(self):
+    
+    self.stopwatch.start()
     t = self.GetTops()
+    elapsed = self.stopwatch.elapsed()
+    self.updateLag.emit(elapsed)
+    
     a1, b1 = t.ask1, t.bid1
     a2, b2 = t.ask2, t.bid2
     a3, b3 = t.ask3, t.bid3
@@ -76,9 +83,10 @@ class TraderThread(QtCore.QThread):
   
   def GetTops(self):
     result = Tops()
-    p1Top = self.GetTop(self.p1)
-    p2Top = self.GetTop(self.p2)
-    p3Top = self.GetTop(self.p3)
+    r = self.tradeAPI.GetDepths([self.p1, self.p2, self.p3], 1, 1, 5)
+    p1Top = ((r[self.p1]['ask'][0]['price'], r[self.p1]['ask'][0]['amount']), (r[self.p1]['bid'][0]['price'], r[self.p1]['bid'][0]['amount']))
+    p2Top = ((r[self.p2]['ask'][0]['price'], r[self.p2]['ask'][0]['amount']), (r[self.p2]['bid'][0]['price'], r[self.p2]['bid'][0]['amount']))
+    p3Top = ((r[self.p3]['ask'][0]['price'], r[self.p3]['ask'][0]['amount']), (r[self.p3]['bid'][0]['price'], r[self.p3]['bid'][0]['amount']))
     
     result.ask1 = p1Top[0][0]
     result.ask1_amount = p1Top[0][1]

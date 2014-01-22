@@ -7,21 +7,28 @@ import tradeapi
 
 app = QtGui.QApplication(sys.argv)
 
-mainWindow = mainwindow.MainWindow()
+tradeApi = None
+exchangeName = ''
+
+if(len(sys.argv) > 1):
+  exchangeName = sys.argv[1]
+else:
+  exchangeName = 'btce'
+
+tradeApi = tradeapi.CreateTradeApi(exchangeName, 'keyfile.txt')  
+
+mainWindow = mainwindow.MainWindow(tradeApi.Name())
 
 mainWindow.show()
 
-tradeApi = None
-
-if(len(sys.argv) > 1 and sys.argv[1] == 'bitfinex'):
-  tradeApi = tradeapi.BitfinexTradeApi()
-else:
-  tradeApi = tradeapi.BTCETradeApi("keyfile.txt")
-
 traderThread = traderthread.TraderThread(app, tradeApi)
 
+mainWindow.ui.label_sec1.setText(traderThread.p1)
+mainWindow.ui.label_sec2.setText(traderThread.p2)
+mainWindow.ui.label_sec3.setText(traderThread.p3)
 
 traderThread.updateData.connect(mainWindow.receiveUpdate)
+traderThread.updateLag.connect(mainWindow.receiveLag)
 app.aboutToQuit.connect(traderThread.quit)
 traderThread.start()
 

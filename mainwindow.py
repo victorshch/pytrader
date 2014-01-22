@@ -11,11 +11,14 @@ import ui_mainwindow
 from ui_mainwindow import Ui_MainWindow
 
 class MainWindow(QtGui.QMainWindow):
-  def __init__(self):
+  def __init__(self, exchangeName):
     QtGui.QMainWindow.__init__(self)
     self.ui = Ui_MainWindow()
     self.ui.setupUi(self)
-    self.maxProfit = Decimal('0')
+    
+    self.setWindowTitle('PyArbitrageTrader - ' + exchangeName)
+    
+    self.maxProfit = Decimal('-1')
     
     self.model = QtGui.QStandardItemModel()
     self.model.setHorizontalHeaderLabels(["Time",
@@ -36,6 +39,10 @@ class MainWindow(QtGui.QMainWindow):
       "USD profit"])
     self.ui.tableView_history.setModel(self.model)
 
+  
+  @pyqtSlot(int)
+  def receiveLag(self, lag):
+    self.ui.spinBox_lag.setValue(lag)
   
   @pyqtSlot(Tops, ArbData, ArbData)
   def receiveUpdate(self, tops, a1, a2):
@@ -63,7 +70,7 @@ class MainWindow(QtGui.QMainWindow):
     if a1.profit > 0 or a2.profit > 0:
       a = a1 if a1.profit > 0 else a2
       
-      print "Got arbitrage opportunity with profit %s" % a.profit
+      print("Got arbitrage opportunity with profit %s" % a.profit)
       
       lastItem = QtGui.QStandardItem()
       lastItem.setText(str(a.usdProfit))
