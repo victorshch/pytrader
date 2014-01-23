@@ -38,7 +38,7 @@ class TraderThread(QtCore.QThread):
   tradeTimer = QtCore.QTimer()
   updateData = pyqtSignal(Tops, ArbData, ArbData)
   updateLag = pyqtSignal(int)
-  def __init__(self, parent, tradeAPI, p1='btcusd', p2='ltcbtc', p3 = 'ltcusd', refreshInterval=900, tradeInterval=15000):
+  def __init__(self, parent, tradeAPI, p1='btcusd', p2='ltcbtc', p3 = 'ltcusd', refreshInterval=100, tradeInterval=15000):
     super(TraderThread, self).__init__(parent)
     self.tradeAPI = tradeAPI
     self.k = Decimal('1') - (tradeAPI.Comission() / Decimal('100.0'))
@@ -46,9 +46,9 @@ class TraderThread(QtCore.QThread):
     self.p2 = p2
     self.p3 = p3
     self.timer.setInterval(refreshInterval)
-    self.timer.setSingleShot(0)
+    self.timer.setSingleShot(True)
     self.tradeTimer.setInterval(tradeInterval)
-    self.tradeTimer.setSingleShot(1)
+    self.tradeTimer.setSingleShot(True)
     self.timer.timeout.connect(self.onTimer)
 
   @pyqtSlot()
@@ -72,6 +72,8 @@ class TraderThread(QtCore.QThread):
     a2 = ArbData("Backward", profit2)
 
     self.updateData.emit(t, a1, a2)
+    
+    self.timer.start()
 
   def run(self):
     self.timer.start()
