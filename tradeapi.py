@@ -66,7 +66,7 @@ class BTCETradeApi(AbstractTradeApi):
     return result
   
   def GetBalance(self, symbolList):
-    info = btceapi.getInfo()
+    info = self.tradeapi.getInfo()
     return { s : getattr(info, 'balance_'+s) for s in symbolList }
   
   def __enter__(self):
