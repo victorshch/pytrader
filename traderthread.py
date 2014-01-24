@@ -32,6 +32,15 @@ class Balance(object):
   balance_ltc = 0
   balance_btc = 0
 
+class TimerRestarter(object):
+  def __init__(self, timer):
+    self.timer = timer
+  def __enter__(self):
+    return self
+  def __exit__(self, type, value, traceback):
+    self.timer.start()
+  
+
 class TraderThread(QtCore.QThread):
   timer = QtCore.QTimer()
   stopwatch = QtCore.QTime()
@@ -53,27 +62,25 @@ class TraderThread(QtCore.QThread):
 
   @pyqtSlot()
   def onTimer(self):
-    
-    self.stopwatch.start()
-    t = self.GetTops()
-    elapsed = self.stopwatch.elapsed()
-    self.updateLag.emit(elapsed)
-    
-    a1, b1 = t.ask1, t.bid1
-    a2, b2 = t.ask2, t.bid2
-    a3, b3 = t.ask3, t.bid3
-    
-    k3 = self.k * self.k * self.k
-    
-    profit1 = k3 * (b3) / ((a1) * (a2)) - Decimal('1.0')
-    profit2 = k3 * (b1) * (b2) / (a3)  - Decimal('1.0')
-    
-    a1 = ArbData("Forward", profit1)
-    a2 = ArbData("Backward", profit2)
+    with TimerRestarter(self.timer) as timerRestarter:
+      self.stopwatch.start()
+      t = self.GetTops()
+      elapsed = self.stopwatch.elapsed()
+      self.updateLag.emit(elapsed)
+      
+      a1, b1 = t.ask1, t.bid1
+      a2, b2 = t.ask2, t.bid2
+      a3, b3 = t.ask3, t.bid3
+      
+      k3 = self.k * self.k * self.k
+      
+      profit1 = k3 * (b3) / ((a1) * (a2)) - Decimal('1.0')
+      profit2 = k3 * (b1) * (b2) / (a3)  - Decimal('1.0')
+      
+      a1 = ArbData("Forward", profit1)
+      a2 = ArbData("Backward", profit2)
 
-    self.updateData.emit(t, a1, a2)
-    
-    self.timer.start()
+      self.updateData.emit(t, a1, a2)
 
   def run(self):
     self.timer.start()
