@@ -18,7 +18,7 @@ sKey = next(sKeyFile)
 
 sHandler = SpreadsheetHandler('spreadsheet-key.txt', sKey, 'Balance watcher')
 
-balance = tradeApi.GetBalance(['btc', 'ltc', 'usd', 'ppc', 'nmc'])
+balance = tradeApi.GetBalance(['btc', 'ltc', 'usd', 'ppc', 'nmc', 'nvc'])
 
 balance['time'] = time.strftime('%m/%d/%Y %H:%M:%S')
 
