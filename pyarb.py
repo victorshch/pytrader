@@ -14,7 +14,7 @@ exchangeName = ''
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--exchange", choices=['btce', 'bitfinex'], default='btce')
-parser.add_argument("--arb-coin", choices=['ltc', 'nmc', 'ppc'], default='ltc', dest='arb_coin')
+parser.add_argument("--arb-coin", choices=['ltc', 'nmc', 'ppc', 'nvc'], default='ltc', dest='arb_coin')
 parser.add_argument("--refresh-timeout", type=int, default=100, dest='refresh_timeout')
 args = parser.parse_args()
 
