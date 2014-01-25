@@ -27,8 +27,8 @@ mainWindow.ui.label_sec1.setText(traderThread.p1)
 mainWindow.ui.label_sec2.setText(traderThread.p2)
 mainWindow.ui.label_sec3.setText(traderThread.p3)
 
-traderThread.updateData.connect(mainWindow.receiveUpdate)
-traderThread.updateLag.connect(mainWindow.receiveLag)
+traderThread.updateData.connect(mainWindow.receiveUpdate, QtCore.Qt.QueuedConnection)
+traderThread.updateLag.connect(mainWindow.receiveLag, QtCore.Qt.QueuedConnection)
 app.aboutToQuit.connect(traderThread.quit)
 traderThread.start()
 
