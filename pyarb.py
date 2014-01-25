@@ -1,6 +1,8 @@
 import sys
 import PyQt4
 from PyQt4 import QtCore, QtGui
+import argparse
+
 import traderthread
 import mainwindow
 import tradeapi
@@ -10,10 +12,15 @@ app = QtGui.QApplication(sys.argv)
 tradeApi = None
 exchangeName = ''
 
-if(len(sys.argv) > 1):
-  exchangeName = sys.argv[1]
-else:
-  exchangeName = 'btce'
+parser = argparse.ArgumentParser()
+parser.add_argument("--exchange", choices=['btce', 'bitfinex'], default='btce')
+parser.add_argument("--arb-coin", choices=['ltc', 'nmc', 'ppc'], default='ltc', dest='arb_coin')
+parser.add_argument("--refresh-timeout", type=int, default=100, dest='refresh_timeout')
+args = parser.parse_args()
+
+exchangeName = args.exchange
+coin = args.arb_coin
+timeout = args.refresh_timeout
 
 tradeApi = tradeapi.CreateTradeApi(exchangeName, 'keyfile.txt')  
 
@@ -21,7 +28,7 @@ mainWindow = mainwindow.MainWindow(tradeApi.Name())
 
 mainWindow.show()
 
-traderThread = traderthread.TraderThread(app, tradeApi)
+traderThread = traderthread.TraderThread(app, tradeApi, 'btcusd', coin+'btc', coin+'usd', timeout)
 
 mainWindow.ui.label_sec1.setText(traderThread.p1)
 mainWindow.ui.label_sec2.setText(traderThread.p2)
