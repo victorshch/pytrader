@@ -38,7 +38,8 @@ class Pairs:
   ltcusd = 'ltcusd'
     
 class BTCETradeApi(AbstractTradeApi):
-  btcePairs = { 'btcusd':'btc_usd', 'ltcbtc':'ltc_btc', 'ltcusd':'ltc_usd' }
+  btcePairs = { 'btcusd':'btc_usd', 'ltcbtc':'ltc_btc', 'ltcusd':'ltc_usd', 'nmcbtc': 'nmc_btc', 'nmcusd': 'nmc_usd',\
+  'ppcbtc': 'ppc_btc', 'ppcusd': 'ppc_usd'}
   
   def __init__(self, key_file):
     self.key_file = key_file
