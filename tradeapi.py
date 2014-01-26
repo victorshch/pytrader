@@ -20,18 +20,23 @@ class AbstractTradeApi(object):
   def GetDepth(self, pair, askLimit = 50, bidLimit = 50):
     pass
   
-  #returns depths for a list of pairs and balance for corresponding securities
-  def GetDepths(self, pairList, askLimit = 50, bidLimit = 50, maxWorkers = 5):
+  def getSymbolList(self, pairList):
     symbolList = []
     for pair in pairList:
-      symbolList.append(pair[:3])
-      symbolList.append(pair[3:])
+      symbolList = symbolList + [pair[:3]]
+      symbolList = symbolList + [pair[3:]]
     symbolList = list(set(symbolList))
+    return symbolList
+
+  #returns depths for a list of pairs and balance for corresponding securities
+  def GetDepths(self, pairList, askLimit = 50, bidLimit = 50, maxWorkers = 5):
+    symbolList = self.getSymbolList(pairList)
     
     with futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
-      balanceFuture = executor.submit(AbstractTradeApi.GetBalance, self, symbolList)
+      balanceFuture = executor.submit(lambda : self.GetBalance(symbolList))
       depths = dict(executor.map(lambda pair: (pair, self.GetDepth(pair, askLimit, bidLimit)), pairList))
-      return { 'depths': depths, 'balance': balanceFuture.result() }
+      r = balanceFuture.result()
+      return { 'depths': depths, 'balance': r }
   
   def GetBalance(self, symbolList):
     pass
