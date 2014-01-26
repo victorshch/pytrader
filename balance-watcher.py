@@ -11,7 +11,7 @@ if(len(sys.argv) > 1):
 else:
   exchangeName = 'btce'
 
-tradeApi = CreateTradeApi(exchangeName, 'balance-watcher-keyfile.txt')
+tradeApi = CreateTradeApi(exchangeName, ['balance-watcher-keyfile.txt'])
 
 sKeyFile = open('balance-table.txt')
 sKey = next(sKeyFile)
