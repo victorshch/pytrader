@@ -22,7 +22,7 @@ exchangeName = args.exchange
 coin = args.arb_coin
 timeout = args.refresh_timeout
 
-tradeApi = tradeapi.CreateTradeApi(exchangeName, 'keyfile.txt')  
+tradeApi = tradeapi.CreateTradeApi(exchangeName, ['keyfile.txt', 'keyfile2.txt', 'keyfile3.txt'])  
 
 mainWindow = mainwindow.MainWindow(tradeApi.Name())
 

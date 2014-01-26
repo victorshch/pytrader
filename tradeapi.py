@@ -20,15 +20,36 @@ class AbstractTradeApi(object):
   def GetDepth(self, pair, askLimit = 50, bidLimit = 50):
     pass
   
+  #returns depths for a list of pairs and balance for corresponding securities
   def GetDepths(self, pairList, askLimit = 50, bidLimit = 50, maxWorkers = 5):
+    symbolList = []
+    for pair in pairList:
+      symbolList.append(pair[:3])
+      symbolList.append(pair[3:])
+    symbolList = list(set(symbolList))
+    
     with futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
-      return dict(executor.map(lambda pair: (pair, self.GetDepth(pair, askLimit, bidLimit)), pairList))
+      balanceFuture = executor.submit(AbstractTradeApi.GetBalance, self, symbolList)
+      depths = dict(executor.map(lambda pair: (pair, self.GetDepth(pair, askLimit, bidLimit)), pairList))
+      return { 'depths': depths, 'balance': balanceFuture.result() }
   
   def GetBalance(self, symbolList):
     pass
   
   def PlaceOrder(self, pair, orderType, price, amount):
     #TODO
+    pass
+  
+  def EnqueueOrder(self, pair, orderType, price, amount):
+    self.orderQueue = self.orderQueue + [(pair, orderType, price, amount)]
+  
+  def PlacePendingOrders(self):
+    pass
+  
+  def CancelPendingOrders(self):
+    self.orderQueue = []
+  
+  def FormatAmount(self, pair, amount):
     pass
 
 
@@ -41,11 +62,12 @@ class BTCETradeApi(AbstractTradeApi):
   btcePairs = { 'btcusd':'btc_usd', 'ltcbtc':'ltc_btc', 'ltcusd':'ltc_usd', 'nmcbtc': 'nmc_btc', 'nmcusd': 'nmc_usd',\
   'ppcbtc': 'ppc_btc', 'ppcusd': 'ppc_usd', 'nvcusd': 'nvc_usd', 'nvcbtc': 'nvc_btc'}
   
-  def __init__(self, key_file):
-    self.key_file = key_file
-    self.handler = btceapi.KeyHandler(key_file, resaveOnDeletion=True)
-    key = self.handler.getKeys()[0]
-    self.tradeapi = btceapi.TradeAPI(key, handler=self.handler)
+  def __init__(self, keyFileList):
+    #todo check for empty list
+    self.keyFileList = keyFileList
+    self.handlerList = [btceapi.KeyHandler(keyFile, resaveOnDeletion=True) for keyFile in keyFileList] 
+    self.tradeApiList = [btceapi.TradeAPI(keyHandler.getKeys()[0], keyHandler) for keyHandler in self.handlerList]
+    self.tradeapi = self.tradeApiList[0]
   
   def Name(self):
     return "BTC-e"
@@ -70,6 +92,21 @@ class BTCETradeApi(AbstractTradeApi):
     info = self.tradeapi.getInfo()
     return { s : getattr(info, 'balance_'+s) for s in symbolList }
   
+  def PlacePendingOrders(self):
+    workerCount = len(self.tradeApiList)
+    result = []
+    while(self.orderQueue):
+      ordersToPlace = self.orderQueue[:workerCount]
+      self.orderQueue = self.orderQueue[workerCount:]
+      orderApiCombination = zip(ordersToPlace, self.tradeApiList)
+      with futures.ThreadPoolExecutor(max_workers=workerCount) as executor:
+        result = result + executor.map(lambda c: c[1].trade(c[0][0], c[0][1], c[0][2], c[0][3]), orderApiCombination)
+    return result
+  
+  def FormatAmount(self, pair, amount):
+    return btceapi.truncateAmount(amount, self.btcePairs[pair])
+    pass
+  
   def __enter__(self):
     return self
 
@@ -77,7 +114,8 @@ class BTCETradeApi(AbstractTradeApi):
     self.close()
   
   def close():
-    self.handler.close()
+    for handler in self.handlerList:
+      handler.close()
     
 class BitfinexTradeApi(AbstractTradeApi):
   
@@ -105,10 +143,10 @@ class BitfinexTradeApi(AbstractTradeApi):
     
     return result
     
-def CreateTradeApi(exchangeName, keyfile):
+def CreateTradeApi(exchangeName, keyfileList):
   if exchangeName.lower() == 'btce' or exchangeName.lower() == 'btc-e':
-    return BTCETradeApi(keyfile)
+    return BTCETradeApi(keyfileList)
   elif exchangeName.lower() == 'bitfinex':
-    return BitfinexTradeApi(keyfile)
+    return BitfinexTradeApi(keyfileList[0])
   else:
     return None
