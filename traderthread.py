@@ -6,6 +6,8 @@ from PyQt4 import QtCore
 from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtCore import pyqtSignal
 
+import btceapi
+
 class Tops(object):
   ask1 = Decimal('0')
   ask1_amount = Decimal('0')
@@ -111,17 +113,24 @@ class TraderThread(QtCore.QThread):
     k2 = self.k * self.k
     k3 = k2 * self.k
     
+    s1 = self.s1
+    s2 = self.s2
+    s3 = self.s3
+    p1 = self.p1
+    p2 = self.p2
+    p3 = self.p3
+    
     usdToSpend = min(self.balance[s1], self.s1ToSpend, a1 / k * min(X, self.s2ToSpend, self.balance[s2]), a1 * a2 / k2 * min(Y, self.s3ToSpend, self.balance[s3]), a1 * a2 / k3 * Z)
     
     profit1 = k3 * b3 / (a1 * a2) - Decimal('1.0')
     
     usdProfit = usdToSpend * profit1
     if(usdProfit < self.minProfit):
-      print "Investment " + str(usdToSpend) + ", profit " + str(usdProfit) + " less than " + str(minProfit)
+      print "Investment " + str(usdToSpend) + ", profit " + str(usdProfit) + " less than " + str(self.minProfit)
       return False
       
-    btcToBuy = tradeAPI.FormatAmount(p1, k * usdToSpend / a1)
-    ltcToBuy = tradeAPI.FormatAmount(p2, k * btcToBuy / a2)
+    btcToBuy = self.tradeAPI.FormatAmount(p1, k * usdToSpend / a1)
+    ltcToBuy = self.tradeAPI.FormatAmount(p2, k * btcToBuy / a2)
     
     if btcToBuy < btceapi.min_orders[p1]:
       print "%s to buy %s less than minimum %s" %(s2, btcToBuy, btceapi.min_orders[p2])
@@ -135,22 +144,22 @@ class TraderThread(QtCore.QThread):
       print "Lag %s is greater than maximum lag %s, not trading" % (self.lag, self.maxLag)
       return False
     
-    if not tradeTimer.isActive():
+    if not self.tradeTimer.isActive():
       print "Buying %s %s at price %s %s" % (btcToBuy, s2, a1, s1)
       
-      tradeAPI.EnqueueOrder(p1, "buy", a1, btcToBuy)
+      self.tradeAPI.EnqueueOrder(p1, "buy", a1, btcToBuy)
       
       print "Buying %s %s at price %s %s" % (ltcToBuy, s3, a2, s2)
       
-      tradeAPI.EnqueueOrder(p2, "buy", a2, ltcToBuy)
+      self.tradeAPI.EnqueueOrder(p2, "buy", a2, ltcToBuy)
       
       print "Selling %s %s at price %s %s" % (ltcToBuy, s3, b3, s1)
       
-      tradeAPI.EnqueueOrder(p3, "sell", b3, ltcToBuy)
+      self.tradeAPI.EnqueueOrder(p3, "sell", b3, ltcToBuy)
       
       print "Executing orders..."
       
-      result = tradeAPI.PlacePendingOrders()
+      result = self.tradeAPI.PlacePendingOrders()
       
       print "Trade 1, received: " + str(result[0].received)
       print "Trade 2, received: " + str(result[1].received)
@@ -172,18 +181,25 @@ class TraderThread(QtCore.QThread):
     k2 = self.k * self.k
     k3 = k2 * self.k
     
+    s1 = self.s1
+    s2 = self.s2
+    s3 = self.s3
+    p1 = self.p1
+    p2 = self.p2
+    p3 = self.p3
+    
     usdToSpend = min(self.s1ToSpend, self.balance[s1], a3 / k * min(Z, self.s3ToSpend, self.balance[s3]), a3 / (k2 * b2) * min(float(int(Y * b2 * 100))/100, self.s2ToSpend, self.balance[s2]), X * a3 / (k3 * b2))
     
     profit2 = k3 * float(b1) * float(b2) / float(a3) - 1.0
 
     usdProfit = usdToSpend * profit2
-    if(usdProfit < minProfit):
-      print "Investment " + str(usdToSpend) + ", profit " + str(usdProfit) + " less than " + str(minProfit)
+    if(usdProfit < self.minProfit):
+      print "Investment " + str(usdToSpend) + ", profit " + str(usdProfit) + " less than " + str(self.minProfit)
       return False
       
-    ltcToBuy = tradeAPI.FormatAmount(p3, k * usdToSpend / a3)
-    btcToBuy = tradeAPI.FormatAmount(p1, formatBTC(k * ltcToBuy * b2))
-    ltcToBuy = tradeAPI.FormatAmount(p3, btcToBuy / (k * b2))
+    ltcToBuy = self.tradeAPI.FormatAmount(p3, k * usdToSpend / a3)
+    btcToBuy = self.tradeAPI.FormatAmount(p1, k * ltcToBuy * b2)
+    ltcToBuy = self.tradeAPI.FormatAmount(p3, btcToBuy / (k * b2))
     usdToGain = k * btcToBuy * b1
     
     if btcToBuy < btceapi.min_orders[p1]:
@@ -198,21 +214,21 @@ class TraderThread(QtCore.QThread):
       print "Lag %s is greater than maximum lag %s, not trading" % (self.lag, self.maxLag)
       return False
     
-    if not tradeTimer.isActive():
+    if not self.tradeTimer.isActive():
       print "Buying " + str(ltcToBuy) + " ltc at price " + str(a3) + " usd"
       
-      tradeAPI.EnqueueOrder(p3, "buy", a3, ltcToBuy)
+      self.tradeAPI.EnqueueOrder(p3, "buy", a3, ltcToBuy)
       
       print "Selling " + str(ltcToBuy) + " ltc at price " + str(b2) + " btc"
       
-      tradeAPI.EnqueueOrder(p2, "sell", b2, ltcToBuy)
+      self.tradeAPI.EnqueueOrder(p2, "sell", b2, ltcToBuy)
       
       print "Selling " + str(btcToBuy) + " btc at price " + str(b1) + " usd"
       
-      tradeAPI.EnqueueOrder(p1, "sell", b1, btcToBuy)
+      self.tradeAPI.EnqueueOrder(p1, "sell", b1, btcToBuy)
       
       print "Executing orders..."
-      result1, result2, result3 = tradeAPI.PlacePendingOrders()
+      result1, result2, result3 = self.tradeAPI.PlacePendingOrders()
       
       print "Trade 1, received: " + str(result1.received)
       print "Trade 2, received: " + str(result2.received)
