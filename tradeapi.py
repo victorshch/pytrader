@@ -71,6 +71,8 @@ class BTCETradeApi(AbstractTradeApi):
   'ppcbtc': 'ppc_btc', 'ppcusd': 'ppc_usd', 'nvcusd': 'nvc_usd', 'nvcbtc': 'nvc_btc'}
   
   def __init__(self, keyFileList):
+    super(BTCETradeApi,self).__init__()
+    
     #todo check for empty list
     self.keyFileList = keyFileList
     self.handlerList = [btceapi.KeyHandler(keyFile, resaveOnDeletion=True) for keyFile in keyFileList] 
@@ -123,13 +125,14 @@ class BTCETradeApi(AbstractTradeApi):
   def __exit__(self, exc_type, exc_value, traceback):
     self.close()
   
-  def close():
+  def close(self):
     for handler in self.handlerList:
       handler.close()
     
 class BitfinexTradeApi(AbstractTradeApi):
   
   def __init__(self, keyfile):
+    super(BitfinexTradeApi,self).__init__()
     self.tradeapi = bitfinex.Bitfinex()
   
   def Name(self):
