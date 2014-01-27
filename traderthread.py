@@ -6,8 +6,6 @@ from PyQt4 import QtCore
 from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtCore import pyqtSignal
 
-import btceapi
-
 class Tops(object):
   ask1 = Decimal('0')
   ask1_amount = Decimal('0')
@@ -30,9 +28,9 @@ class ArbData(object):
     self.usdInvestment = usdInvestment
   
 class Balance(object):
-  balance_usd = 0
-  balance_ltc = 0
-  balance_btc = 0
+  balance_usd = Decimal('0')
+  balance_ltc = Decimal('0')
+  balance_btc = Decimal('0')
 
 class TimerRestarter(object):
   def __init__(self, timer):
@@ -132,12 +130,12 @@ class TraderThread(QtCore.QThread):
     btcToBuy = self.tradeAPI.FormatAmount(p1, k * usdToSpend / a1)
     ltcToBuy = self.tradeAPI.FormatAmount(p2, k * btcToBuy / a2)
     
-    if btcToBuy < btceapi.min_orders[p1]:
-      print "%s to buy %s less than minimum %s" %(s2, btcToBuy, btceapi.min_orders[p2])
+    if btcToBuy < self.tradeAPI.GetMinAmount(p1):
+      print "%s to buy %s less than minimum %s" %(s2, btcToBuy, self.tradeAPI.GetMinAmount(p1))
       return False
       
-    if ltcToBuy < btceapi.min_orders[p2]:
-      print "%s to buy %s less than minimum %s" %(s3, ltcToBuy, btceapi.min_orders[p3])
+    if ltcToBuy < min(self.tradeAPI.GetMinAmount(p2), self.tradeAPI.GetMinAmount(p3)):
+      print "%s to buy %s less than minimum %s" %(s3, ltcToBuy, min(self.tradeAPI.GetMinAmount(p2), self.tradeAPI.GetMinAmount(p3)))
       return False
     
     if self.lag > self.maxLag:
@@ -190,7 +188,7 @@ class TraderThread(QtCore.QThread):
     
     usdToSpend = min(self.s1ToSpend, self.balance[s1], a3 / k * min(Z, self.s3ToSpend, self.balance[s3]), a3 / (k2 * b2) * min(float(int(Y * b2 * 100))/100, self.s2ToSpend, self.balance[s2]), X * a3 / (k3 * b2))
     
-    profit2 = k3 * float(b1) * float(b2) / float(a3) - 1.0
+    profit2 = k3 * b1 * b2 / a3 - Decimal('1.0')
 
     usdProfit = usdToSpend * profit2
     if(usdProfit < self.minProfit):
@@ -202,13 +200,13 @@ class TraderThread(QtCore.QThread):
     ltcToBuy = self.tradeAPI.FormatAmount(p3, btcToBuy / (k * b2))
     usdToGain = k * btcToBuy * b1
     
-    if btcToBuy < btceapi.min_orders[p1]:
-      print "%s to buy " % s2 + str(btcToBuy) + " less than minimum " + str(btceapi.min_orders[p2])
-      return
+    if btcToBuy < self.tradeAPI.GetMinAmount(p1):
+      print "%s to buy %s less than minimum %s" %(s2, btcToBuy, self.tradeAPI.GetMinAmount(p1))
+      return False
       
-    if ltcToBuy < btceapi.min_orders[p2]:
-      print "%s to buy " %s3 + str(ltcToBuy) + " less than minimum " + str(btceapi.min_orders[p3])
-      return
+    if ltcToBuy < min(self.tradeAPI.GetMinAmount(p2), self.tradeAPI.GetMinAmount(p3)):
+      print "%s to buy %s less than minimum %s" %(s3, ltcToBuy, min(self.tradeAPI.GetMinAmount(p2), self.tradeAPI.GetMinAmount(p3)))
+      return False
       
     if self.lag > self.maxLag:
       print "Lag %s is greater than maximum lag %s, not trading" % (self.lag, self.maxLag)
