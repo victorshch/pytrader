@@ -169,9 +169,9 @@ class TraderThread(QtCore.QThread):
       
       return False
   def tradeBackward(self):
-    a1, X, b1, X2 = self.tops.ask1, self.tops.ask1_amount, self.tops.bid1, self.tops.bid1_amount
-    a2, Y, b2, Y2 = self.tops.ask2, self.tops.ask2_amount, self.tops.bid2, self.tops.bid2_amount
-    a3, Z2, b3, Z = self.tops.ask3, self.tops.ask3_amount, self.tops.bid3, self.tops.bid3_amount
+    a1, X2, b1, X = self.tops.ask1, self.tops.ask1_amount, self.tops.bid1, self.tops.bid1_amount
+    a2, Y2, b2, Y = self.tops.ask2, self.tops.ask2_amount, self.tops.bid2, self.tops.bid2_amount
+    a3, Z, b3, Z2 = self.tops.ask3, self.tops.ask3_amount, self.tops.bid3, self.tops.bid3_amount
     
     print "%s: exploring %s->%s->%s->%s arbitrage opportunity" % (str(QtCore.QDateTime.currentDateTime().toString()), self.s1, self.s3, self.s2, self.s1)
     
@@ -186,7 +186,7 @@ class TraderThread(QtCore.QThread):
     p2 = self.p2
     p3 = self.p3
     
-    usdToSpend = min(self.s1ToSpend, self.balance[s1], a3 / k * min(Z, self.s3ToSpend, self.balance[s3]), a3 / (k2 * b2) * min(float(int(Y * b2 * 100))/100, self.s2ToSpend, self.balance[s2]), X * a3 / (k3 * b2))
+    usdToSpend = min(self.s1ToSpend, self.balance[s1], a3 / k * min(Z, self.s3ToSpend, self.balance[s3]), a3 / (k2 * b2) * min(Y, self.s2ToSpend, self.balance[s2]), X * a3 / (k3 * b2 * b3))
     
     profit2 = k3 * b1 * b2 / a3 - Decimal('1.0')
 
