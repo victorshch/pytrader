@@ -56,6 +56,9 @@ class AbstractTradeApi(object):
   
   def FormatAmount(self, pair, amount):
     pass
+  
+  def GetMinAmount(self, pair):
+    pass
 
 
 class Pairs:
@@ -110,7 +113,9 @@ class BTCETradeApi(AbstractTradeApi):
   
   def FormatAmount(self, pair, amount):
     return btceapi.truncateAmount(amount, self.btcePairs[pair])
-    pass
+  
+  def GetMinAmount(self, pair):
+    return btceapi.min_orders[btcePairs[pair]]
   
   def __enter__(self):
     return self
