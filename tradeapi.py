@@ -115,7 +115,7 @@ class BTCETradeApi(AbstractTradeApi):
     return btceapi.truncateAmount(amount, self.btcePairs[pair])
   
   def GetMinAmount(self, pair):
-    return btceapi.min_orders[btcePairs[pair]]
+    return btceapi.min_orders[self.btcePairs[pair]]
   
   def __enter__(self):
     return self
