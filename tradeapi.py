@@ -110,7 +110,7 @@ class BTCETradeApi(AbstractTradeApi):
       self.orderQueue = self.orderQueue[workerCount:]
       orderApiCombination = zip(ordersToPlace, self.tradeApiList)
       with futures.ThreadPoolExecutor(max_workers=workerCount) as executor:
-        partialResult = executor.map(lambda c: c[1].trade(btcePairs[c[0][0]], c[0][1], c[0][2], c[0][3]), orderApiCombination)
+        partialResult = executor.map(lambda c: c[1].trade(self.btcePairs[c[0][0]], c[0][1], c[0][2], c[0][3]), orderApiCombination)
         for e in partialResult:
           result = result + [e]
     return result
