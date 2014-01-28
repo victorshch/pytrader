@@ -30,22 +30,21 @@ exchangeName = args.exchange
 coin = args.arb_coin
 timeout = args.refresh_timeout
 
-tradeApi = tradeapi.CreateTradeApi(exchangeName, ['keyfile.txt', 'keyfile2.txt', 'keyfile3.txt'])  
+with tradeapi.CreateTradeApi(exchangeName, ['keyfile.txt', 'keyfile2.txt', 'keyfile3.txt']) as tradeApi:
+  mainWindow = mainwindow.MainWindow(tradeApi.Name())
 
-mainWindow = mainwindow.MainWindow(tradeApi.Name())
+  mainWindow.show()
 
-mainWindow.show()
+  traderThread = traderthread.TraderThread(app, tradeApi, 'btcusd', coin+'btc', coin+'usd', timeout, args.trade_interval,
+  args.usd_to_spend, args.btc_to_spend, args.arb_coin_to_spend, args.min_profit, args.max_lag)
 
-traderThread = traderthread.TraderThread(app, tradeApi, 'btcusd', coin+'btc', coin+'usd', timeout, args.trade_interval,
-args.usd_to_spend, args.btc_to_spend, args.arb_coin_to_spend, args.min_profit, args.max_lag)
+  mainWindow.ui.label_sec1.setText(traderThread.p1)
+  mainWindow.ui.label_sec2.setText(traderThread.p2)
+  mainWindow.ui.label_sec3.setText(traderThread.p3)
 
-mainWindow.ui.label_sec1.setText(traderThread.p1)
-mainWindow.ui.label_sec2.setText(traderThread.p2)
-mainWindow.ui.label_sec3.setText(traderThread.p3)
+  traderThread.updateData.connect(mainWindow.receiveUpdate, QtCore.Qt.QueuedConnection)
+  traderThread.updateLag.connect(mainWindow.receiveLag, QtCore.Qt.QueuedConnection)
+  app.aboutToQuit.connect(traderThread.quit)
+  traderThread.start()
 
-traderThread.updateData.connect(mainWindow.receiveUpdate, QtCore.Qt.QueuedConnection)
-traderThread.updateLag.connect(mainWindow.receiveLag, QtCore.Qt.QueuedConnection)
-app.aboutToQuit.connect(traderThread.quit)
-traderThread.start()
-
-sys.exit(app.exec_())
+  sys.exit(app.exec_())
