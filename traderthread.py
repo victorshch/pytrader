@@ -163,6 +163,7 @@ class TraderThread(QtCore.QThread):
       print "Trade 2, received: " + str(result[1].received)
       print "Trade 3, received: " + str(result[2].received)
       
+      tradeTimer.start()
       return True
     else:
       print "Trade timer is active, not trading"
