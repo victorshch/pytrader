@@ -187,7 +187,7 @@ class TraderThread(QtCore.QThread):
     p2 = self.p2
     p3 = self.p3
     
-    usdToSpend = min(self.s1ToSpend, self.balance[s1], a3 / k * min(Z, self.s3ToSpend, self.balance[s3]), a3 / (k2 * b2) * min(Y, self.s2ToSpend, self.balance[s2]), X * a3 / (k3 * b2 * b3))
+    usdToSpend = min(self.s1ToSpend, self.balance[s1], a3 / k * min(Z, self.s3ToSpend, self.balance[s3]), a3 / (k2 * b2) * min(Y * b2, self.s2ToSpend, self.balance[s2]), X * a3 / (k3 * b2))
     
     profit2 = k3 * b1 * b2 / a3 - Decimal('1.0')
 
