@@ -136,7 +136,7 @@ class TraderThread(QtCore.QThread):
               self.tradeAPI.EnqueueOrder(*order)
             
             print "Placing orders..."
-            r1, r2, r3 = self.tradeAPI.ProcessPendingOrders()
+            r1, r2, r3 = self.tradeAPI.PlacePendingOrders()
             
             print "Received from trade 1: %s" % r1
             print "Received from trade 2: %s" % r2
