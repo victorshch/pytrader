@@ -70,7 +70,7 @@ class MainWindow(QtGui.QMainWindow):
     if a1.profit > 0 or a2.profit > 0:
       a = a1 if a1.profit > 0 else a2
       
-      print("Got arbitrage opportunity with profit %s" % a.profit)
+      #print("Got arbitrage opportunity with profit %s" % a.profit)
       
       lastItem = QtGui.QStandardItem()
       lastItem.setText(str(a.usdProfit))
