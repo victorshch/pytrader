@@ -117,7 +117,10 @@ class BTCETradeApi(AbstractTradeApi):
   
   def FormatAmount(self, pair, amount):
     return btceapi.truncateAmount(amount, self.btcePairs[pair])
-  
+
+  def FormatPrice(self, pair, price):
+    return btceapi.truncateAmount(price, self.btcePairs[pair])
+
   def GetMinAmount(self, pair):
     return btceapi.min_orders[self.btcePairs[pair]]
   
