@@ -101,7 +101,7 @@ class TraderThread(QtCore.QThread):
       usdProfit = Decimal('0.0')
       
       if orders:
-        print "Exploring arbitrage opportunity: %s" % orders
+        print "%s: Exploring arbitrage opportunity: %s" % (str(QtCore.QDateTime.currentDateTime().toString()), orders)
         
         exchangeModel = arbmath.ExchangeModel(self.depths, self.tradeAPI)
         
