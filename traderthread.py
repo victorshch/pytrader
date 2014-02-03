@@ -133,10 +133,10 @@ class TraderThread(QtCore.QThread):
         if not self.tradeTimer.isActive():
           if usdProfit > self.minProfit:
             for order in orders:
-              tradeAPI.EnqueueOrder(*order)
+              self.tradeAPI.EnqueueOrder(*order)
             
             print "Placing orders..."
-            r1, r2, r3 = tradeAPI.ProcessPendingOrders()
+            r1, r2, r3 = self.tradeAPI.ProcessPendingOrders()
             
             print "Received from trade 1: %s" % r1
             print "Received from trade 2: %s" % r2
