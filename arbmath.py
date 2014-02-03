@@ -2,16 +2,6 @@ import decimal
 from decimal import Decimal
 import copy
 
-def CalculateArb(direction, price1, price2, price3, k):
-  if price1 == None or price2 == None or price3 == None:
-    return Decimal('0')
-  if direction.lower() == 'forward':
-    return k * k * k * price3 / (price1 * price2) - Decimal('1.0')
-  elif direction.lower() == 'backward':
-    return k * k * k * price1 * price2 / price3 - Decimal('1.0')
-  else:
-    return Decimal('0')
-
 class ExchangeModel(object):
   def __init__(self, depths, tradeApi):
     self.depths = depths;
@@ -22,7 +12,7 @@ class ExchangeModel(object):
   # returns (balance, remaining order)
   def ModelL1Trade(self, balance, pair, type, price, amount):
     
-    print "ModelL1Trade: %s %s in %s for %s" % (type, amount, pair, price)
+    #print "ModelL1Trade: %s %s in %s for %s" % (type, amount, pair, price)
     
     depth = self.depths[pair]
     
@@ -43,7 +33,7 @@ class ExchangeModel(object):
       tradedAmount = min(amount, ask['amount'])
       remainder = max(amount - ask['amount'], 0)
       
-      print "Traded amount: %s, traded price: %s" % (tradedAmount, ask['price'])
+      #print "Traded amount: %s, traded price: %s" % (tradedAmount, ask['price'])
       
       ask['amount'] -= tradedAmount
       balance[pair[:3]] += tradedAmount * k
@@ -64,7 +54,7 @@ class ExchangeModel(object):
       tradedAmount = min(amount, bid['amount'])
       remainder = max(amount - bid['amount'], 0)
       
-      print "Traded amount: %s, traded price: %s" % (tradedAmount, bid['price'])
+      #print "Traded amount: %s, traded price: %s" % (tradedAmount, bid['price'])
       
       bid['amount'] -= tradedAmount
       balance[pair[:3]] -= tradedAmount
@@ -95,6 +85,16 @@ class ExchangeModel(object):
         break
     
     return (balance2, remainingOrder)
+
+def CalculateArb(direction, price1, price2, price3, k):
+  if price1 == None or price2 == None or price3 == None:
+    return Decimal('0')
+  if direction.lower() == 'forward':
+    return k * k * k * price3 / (price1 * price2) - Decimal('1.0')
+  elif direction.lower() == 'backward':
+    return k * k * k * price1 * price2 / price3 - Decimal('1.0')
+  else:
+    return Decimal('0')
     
 class ArbModel(object):
   def __init__(self, books, pair1, pair2, pair3, k):
@@ -144,7 +144,7 @@ class ArbModel(object):
     profitPercent = self.arbPercent('forward')
     profitPercentBackward = self.arbPercent('backward') 
     
-    print "profitPercent: %s, profitPercentBackward: %s" % (profitPercent, profitPercentBackward)
+    #print "profitPercent: %s, profitPercentBackward: %s" % (profitPercent, profitPercentBackward)
     
     if profitPercent > Decimal('0'):
       direction = 'forward'
@@ -156,18 +156,21 @@ class ArbModel(object):
     
     depths = (0, 0, 0)
     
+    #print "New depths: %s, profitPercent: %s" % (str(depths), profitPercent)
+    
     addTuple = lambda t1, t2: tuple(e1 + e2 for e1, e2 in zip(t1, t2))
     
-    for x in [(1, 0, 0), (0, 1, 0), (0, 0, 1)]:
-      while True:
+    condition = True
+    #todo think about more clever way to find depths
+    while condition:
+      condition = False
+      for x in [(1, 0, 0), (0, 1, 0), (0, 0, 1)]:
         newDepths = addTuple(depths, x)
         profitPercent = self.arbPercent(direction, newDepths)
+        #print "New depths: %s, profitPercent: %s" % (str(newDepths), profitPercent)
         if profitPercent > Decimal('0'):
           depths = newDepths
-        else:
-          break
-    
-    print "depths: " + str(depths)
+          condition = True
     
     return (direction, depths)
 
@@ -246,10 +249,7 @@ def CalculateArbOrders(books, pair1, pair2, pair3, k, balance, tradeApi):
     usdToSpend = tradeApi.FormatPrice(pair1, 
       min(balance[s1], a1 / k * min(X, balance[s2]), a1 * a2 / (k*k) * min(Y, balance[s3]), a1 * a2 / (k*k*k) * Z))
       
-    print "balance: %s" % balance
-    print level1, level2, level3
-    print a1 / k * min(X, balance[s2]), a1 * a2 / (k*k) * min(Y, balance[s3]), a1 * a2 / (k*k*k) * Z
-    print "usdToSpend: %s" % usdToSpend
+    #print "balance: %s" % balance
     
     btcToBuy = tradeApi.FormatAmount(pair1, k * usdToSpend / a1)
     ltcToBuy = tradeApi.FormatAmount(pair2, k * btcToBuy / a2)
@@ -272,6 +272,10 @@ def CalculateArbOrders(books, pair1, pair2, pair3, k, balance, tradeApi):
     Z = level3[1]
     
     usdToSpend = min(balance[s1], a3 / k * min(Z, balance[s3]), a3 / (k * k * b2) * min(Y * b2, balance[s2]), X * a3 / (k * k * k * b2))
+    #print b1, b2, a3
+    #print X, Y, Z
+    #print balance[s1], a3 / k * min(Z, balance[s3]), a3 / (k * k * b2) * min(Y * b2, balance[s2]), X * a3 / (k * k * k * b2)
+    print "usdToSpend: %s" % usdToSpend
     
     ltcToBuy = tradeApi.FormatAmount(pair3, k * usdToSpend / a3)
     btcToBuy = tradeApi.FormatAmount(pair1, k * ltcToBuy * b2)
@@ -279,13 +283,13 @@ def CalculateArbOrders(books, pair1, pair2, pair3, k, balance, tradeApi):
 
     if btcToBuy < tradeApi.GetMinAmount(pair1):
       print "%s to buy %s less than minimum %s" %(s2, btcToBuy, tradeApi.GetMinAmount(pair1))
-      return []
+      return ([], maxDepth)
       
-    if ltcToBuy < min(tradeApi.GetMinAmount(pair2), self.tradeApi.GetMinAmount(pair3)):
+    if ltcToBuy < min(tradeApi.GetMinAmount(pair2), tradeApi.GetMinAmount(pair3)):
       print "%s to buy %s less than minimum %s" %(s3, ltcToBuy, min(tradeApi.GetMinAmount(pair2), tradeApi.GetMinAmount(pair3)))
-      return []
+      return ([], maxDepth)
     
-    return ([(pair3, 'buy', a3, ltcToBuy), (pair2, 'sell', b2, btcToBuy), (pair1, 'buy', a1, btcToBuy)], maxDepth)
+    return ([(pair3, 'buy', a3, ltcToBuy), (pair2, 'sell', b2, ltcToBuy), (pair1, 'sell', b1, btcToBuy)], maxDepth)
   else:
     return ([], maxDepth)
 
