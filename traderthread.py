@@ -138,9 +138,9 @@ class TraderThread(QtCore.QThread):
             print "Placing orders..."
             r1, r2, r3 = self.tradeAPI.PlacePendingOrders()
             
-            print "Received from trade 1: %s" % r1
-            print "Received from trade 2: %s" % r2
-            print "Received from trade 3: %s" % r3
+            print "Received from trade 1: %s" % r1.received
+            print "Received from trade 2: %s" % r2.received
+            print "Received from trade 3: %s" % r3.received
             
             self.tradeTimer.start()
           else:
