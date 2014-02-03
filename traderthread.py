@@ -23,7 +23,7 @@ class Tops(object):
   bid3_amount = Decimal('0')
   
 class ArbData(object):
-  def __init__(self, direction = "Forward", p = 0, usdProfit = 0, usdInvestment = 0):
+  def __init__(self, direction = "Forward", p = Decimal('0'), usdProfit = Decimal('0'), usdInvestment = Decimal('0')):
     self.tradeDirection = direction
     self.profit = p
     self.usdProfit = usdProfit
