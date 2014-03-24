@@ -24,6 +24,7 @@ parser.add_argument("--btc-to-spend", type=Decimal, default=Decimal('0.02'), des
 parser.add_argument("--arb-coin-to-spend", type=Decimal, default=Decimal('1'), dest='arb_coin_to_spend')
 parser.add_argument("--min-profit", type=Decimal, default=Decimal('0.01'), dest='min_profit')
 parser.add_argument("--max-lag", type=int, default=1000, dest='max_lag')
+parser.add_argument("--greedy-percent", type=Decimal, default=0, dest='greedy_percent')
 args = parser.parse_args()
 
 exchangeName = args.exchange
@@ -36,7 +37,7 @@ with tradeapi.CreateTradeApi(exchangeName, ['keyfile.txt', 'keyfile2.txt', 'keyf
   mainWindow.show()
 
   traderThread = traderthread.TraderThread(app, tradeApi, 'btcusd', coin+'btc', coin+'usd', timeout, args.trade_interval,
-  args.usd_to_spend, args.btc_to_spend, args.arb_coin_to_spend, args.min_profit, args.max_lag)
+  args.usd_to_spend, args.btc_to_spend, args.arb_coin_to_spend, args.min_profit, args.max_lag, args.greedy_percent)
 
   mainWindow.ui.label_sec1.setText(traderThread.p1)
   mainWindow.ui.label_sec2.setText(traderThread.p2)

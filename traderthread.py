@@ -50,7 +50,7 @@ class TraderThread(QtCore.QThread):
   updateData = pyqtSignal(Tops, ArbData, ArbData)
   updateLag = pyqtSignal(int)
   def __init__(self, parent, tradeAPI, p1='btcusd', p2='ltcbtc', p3 = 'ltcusd', refreshInterval=100, tradeInterval=15000,
-  s1ToSpend = 20, s2ToSpend = 0.03, s3ToSpend = 4, minProfit = 0.01, maxLag = 900):
+  s1ToSpend = 20, s2ToSpend = 0.03, s3ToSpend = 4, minProfit = 0.01, maxLag = 900, greedyPercent = Decimal('0')):
     super(TraderThread, self).__init__(parent)
     self.tradeAPI = tradeAPI
     self.k = Decimal('1') - (tradeAPI.Comission() / Decimal('100.0'))
@@ -62,6 +62,8 @@ class TraderThread(QtCore.QThread):
     self.s3 = p3[:3]
     self.minProfit = minProfit
     self.maxLag = maxLag
+    self.greedyPercent = greedyPercent
+    self.greedyMultiplier = Decimal('1') - greedyPercent / Decimal('100')
     self.s1ToSpend = s1ToSpend
     self.s2ToSpend = s2ToSpend
     self.s3ToSpend = s3ToSpend
@@ -103,6 +105,19 @@ class TraderThread(QtCore.QThread):
       if orders:
         print "%s: Exploring arbitrage opportunity: %s" % (str(QtCore.QDateTime.currentDateTime().toString()), orders)
         
+        if self.greedyPercent > Decimal('0'):
+          for i in range(0, len(orders)):
+            if orders[i][0] == self.s1:
+              order = orders[i]
+              if orders[i][1] == 'buy':
+                print "Applying reducing greedy percent to price %s" % order[2]
+                orders[i] = (order[0], order[1], order[2] * self.greedyMultiplier, order[3])
+                print "Result: %s" % orders[i][2]
+              elif order[1] == 'sell':
+                print "Applying increasing greedy percent to price %s" % order[2]
+                orders[i] = (order[0], order[1], order[2] / self.greedyMultiplier, order[3])
+                print "Result: %s" % order[2]
+
         exchangeModel = arbmath.ExchangeModel(self.depths, self.tradeAPI)
         
         newBalance = copy.deepcopy(balance)
@@ -132,8 +147,7 @@ class TraderThread(QtCore.QThread):
         
         if not self.tradeTimer.isActive():
           if usdProfit > self.minProfit:
-            for order in orders:
-              self.tradeAPI.EnqueueOrder(*order)
+            self.tradeAPI.EnqueueOrder(*order)
             
             print "Placing orders..."
             r1, r2, r3 = self.tradeAPI.PlacePendingOrders()
