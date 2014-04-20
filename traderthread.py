@@ -108,7 +108,7 @@ class TraderThread(QtCore.QThread):
         
         if self.greedyPercent > Decimal('0'):
           for i in range(0, len(orders)):
-            if orders[i].pair == self.s1:
+            if orders[i].pair == self.p1:
               order = orders[i]
               if order.orderType == 'buy':
                 print "Applying reducing greedy percent to price %s" % order.price
