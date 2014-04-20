@@ -9,6 +9,8 @@ import bitfinex
 import arbmath
 from arbmath import Order
 
+from random import randint
+
 class AbstractTradeApi(object):
   def __init__(self):
     self.orderQueue = []
@@ -199,10 +201,20 @@ class DummyTradeApi(AbstractTradeApi):
       return {}
       
     asks, bids = btceapi.getDepth(self.btcePairs[pair])
-    result = { \
-      'ask' : [{ 'price' : (price / Decimal('2')), 'amount' : amount } for price, amount in asks[:askLimit]], \
-      'bid' : [{ 'price' : price, 'amount' : amount } for price, amount in bids[:bidLimit]]  \
-      }
+    
+    r = randint(0, 1)
+    
+    if r == 0:
+      result = { \
+        'ask' : [{ 'price' : (price / Decimal('2')), 'amount' : amount } for price, amount in asks[:askLimit]], \
+        'bid' : [{ 'price' : price, 'amount' : amount } for price, amount in bids[:bidLimit]]  \
+        }
+    else:
+      result = { \
+        'ask' : [{ 'price' : price, 'amount' : amount } for price, amount in asks[:askLimit]], \
+        'bid' : [{ 'price' : (price * Decimal('2')), 'amount' : amount } for price, amount in bids[:bidLimit]]  \
+        }
+      
             
     return result
   
