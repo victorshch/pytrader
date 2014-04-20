@@ -225,7 +225,7 @@ class DummyTradeApi(AbstractTradeApi):
     result = []
     for order in self.orderQueue:
       print "DummyTradeApi: placing order: %s" % str(order)
-      result = result + [DummyTradeResult()]
+    result = [DummyTradeResult() for order in self.orderQueue]
     self.orderQueue = []
     return result
   
