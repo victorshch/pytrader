@@ -6,6 +6,9 @@ from concurrent import futures
 import btceapi
 import bitfinex
 
+import arbmath
+from arbmath import Order
+
 class AbstractTradeApi(object):
   def __init__(self):
     self.orderQueue = []
@@ -47,12 +50,18 @@ class AbstractTradeApi(object):
   
   def EnqueueOrder(self, pair, orderType, price, amount):
     self.orderQueue = self.orderQueue + [(pair, orderType, price, amount)]
+    
+  def EnqueueOrderA(self, order):
+    self.EnqueueOrder(order.pair, order.orderType, order.price, order.amount)
   
   def PlacePendingOrders(self):
     pass
   
   def CancelPendingOrders(self):
     self.orderQueue = []
+  
+  def FormatPrice(self, pair, price):
+    pass
   
   def FormatAmount(self, pair, amount):
     pass
@@ -160,11 +169,79 @@ class BitfinexTradeApi(AbstractTradeApi):
       }
     
     return result
+
+class DummyTradeResult(object):
+  def __init__(self):
+    self.received = Decimal('0')
+ 
+class DummyTradeApi(AbstractTradeApi):
+  btcePairs = { 'btcusd':'btc_usd', 'ltcbtc':'ltc_btc', 'ltcusd':'ltc_usd', 'nmcbtc': 'nmc_btc', 'nmcusd': 'nmc_usd',\
+  'ppcbtc': 'ppc_btc', 'ppcusd': 'ppc_usd', 'nvcusd': 'nvc_usd', 'nvcbtc': 'nvc_btc'}
+  
+  def __init__(self, keyFileList):
+    super(DummyTradeApi,self).__init__()
+    
+    #todo check for empty list
+    self.keyFileList = keyFileList
+    self.handlerList = [btceapi.KeyHandler(keyFile, resaveOnDeletion=True) for keyFile in keyFileList] 
+    self.tradeApiList = [btceapi.TradeAPI(keyHandler.getKeys()[0], keyHandler) for keyHandler in self.handlerList]
+    self.tradeapi = self.tradeApiList[0]
+  
+  def Name(self):
+    return "Dummy"
+  
+  #Fee (%)
+  def Comission(self):
+    return Decimal('0.2')
+  
+  def GetDepth(self, pair, askLimit = 50, bidLimit = 50):
+    if(not pair in self.btcePairs):
+      return {}
+      
+    asks, bids = btceapi.getDepth(self.btcePairs[pair])
+    result = { \
+      'ask' : [{ 'price' : price, 'amount' : amount } for price, amount in asks[:askLimit]], \
+      'bid' : [{ 'price' : price, 'amount' : amount } for price, amount in bids[:bidLimit]]  \
+      }
+            
+    return result
+  
+  def GetBalance(self, symbolList):
+    info = self.tradeapi.getInfo()
+    return { s : getattr(info, 'balance_'+s) for s in symbolList }
+  
+  def PlacePendingOrders(self):
+    result = []
+    for order in self.orderQueue:
+      print "DummyTradeApi: placing order: %s" % order
+      result = result + [DummyTradeResult()]
+    return result
+  
+  def FormatAmount(self, pair, amount):
+    return btceapi.truncateAmount(amount, self.btcePairs[pair])
+
+  def FormatPrice(self, pair, price):
+    return btceapi.truncateAmount(price, self.btcePairs[pair])
+
+  def GetMinAmount(self, pair):
+    return btceapi.min_orders[self.btcePairs[pair]]
+  
+  def __enter__(self):
+    return self
+
+  def __exit__(self, exc_type, exc_value, traceback):
+    self.close()
+  
+  def close(self):
+    for handler in self.handlerList:
+      handler.close()
     
 def CreateTradeApi(exchangeName, keyfileList):
   if exchangeName.lower() == 'btce' or exchangeName.lower() == 'btc-e':
     return BTCETradeApi(keyfileList)
   elif exchangeName.lower() == 'bitfinex':
     return BitfinexTradeApi(keyfileList[0])
+  elif exchangeName.lower() == 'dummy':
+    return DummyTradeApi(keyfileList)
   else:
     return None

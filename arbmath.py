@@ -2,6 +2,13 @@ import decimal
 from decimal import Decimal
 import copy
 
+class Order(object):
+  def __init__(self, pair, op, price, amount):
+    self.pair = pair
+    self.orderType = op
+    self.price = price
+    self.amount = amount
+
 class ExchangeModel(object):
   def __init__(self, depths, tradeApi):
     self.depths = depths;
@@ -262,7 +269,7 @@ def CalculateArbOrders(books, pair1, pair2, pair3, k, balance, tradeApi):
       print "%s to buy %s less than minimum %s" %(s3, ltcToBuy, min(tradeApi.GetMinAmount(pair2), tradeApi.GetMinAmount(pair3)))
       return ([], maxDepth)
     
-    return ([(pair1, 'buy', a1, btcToBuy), (pair2, 'buy', a2, ltcToBuy), (pair3, 'sell', b3, ltcToBuy)], maxDepth)
+    return ([Order(pair1, 'buy', a1, btcToBuy), Order(pair2, 'buy', a2, ltcToBuy), Order(pair3, 'sell', b3, ltcToBuy)], maxDepth)
   elif direction == 'backward':
     b1 = level1[0]
     X = level1[1]
@@ -289,7 +296,7 @@ def CalculateArbOrders(books, pair1, pair2, pair3, k, balance, tradeApi):
       print "%s to buy %s less than minimum %s" %(s3, ltcToBuy, min(tradeApi.GetMinAmount(pair2), tradeApi.GetMinAmount(pair3)))
       return ([], maxDepth)
     
-    return ([(pair3, 'buy', a3, ltcToBuy), (pair2, 'sell', b2, ltcToBuy), (pair1, 'sell', b1, btcToBuy)], maxDepth)
+    return ([Order(pair3, 'buy', a3, ltcToBuy), Order(pair2, 'sell', b2, ltcToBuy), Order(pair1, 'sell', b1, btcToBuy)], maxDepth)
   else:
     return ([], maxDepth)
 
