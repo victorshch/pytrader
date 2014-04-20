@@ -212,7 +212,7 @@ class DummyTradeApi(AbstractTradeApi):
   def PlacePendingOrders(self):
     result = []
     for order in self.orderQueue:
-      print "DummyTradeApi: placing order: %s" % order
+      print "DummyTradeApi: placing order: %s" % str(order)
       result = result + [DummyTradeResult()]
     return result
   
