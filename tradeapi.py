@@ -200,15 +200,14 @@ class DummyTradeApi(AbstractTradeApi):
       
     asks, bids = btceapi.getDepth(self.btcePairs[pair])
     result = { \
-      'ask' : [{ 'price' : price, 'amount' : amount } for price, amount in asks[:askLimit]], \
+      'ask' : [{ 'price' : (price / Decimal('2')), 'amount' : amount } for price, amount in asks[:askLimit]], \
       'bid' : [{ 'price' : price, 'amount' : amount } for price, amount in bids[:bidLimit]]  \
       }
             
     return result
   
   def GetBalance(self, symbolList):
-    info = self.tradeapi.getInfo()
-    return { s : getattr(info, 'balance_'+s) for s in symbolList }
+    return { s : Decimal('100') for s in symbolList }
   
   def PlacePendingOrders(self):
     result = []
