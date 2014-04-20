@@ -226,6 +226,7 @@ class DummyTradeApi(AbstractTradeApi):
     for order in self.orderQueue:
       print "DummyTradeApi: placing order: %s" % str(order)
       result = result + [DummyTradeResult()]
+    self.orderQueue = []
     return result
   
   def FormatAmount(self, pair, amount):
