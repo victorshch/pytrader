@@ -7,6 +7,7 @@ from PyQt4 import QtCore
 from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtCore import pyqtSignal
 import arbmath
+from arbmath import Order
 
 class Tops(object):
   ask1 = Decimal('0')
@@ -107,22 +108,22 @@ class TraderThread(QtCore.QThread):
         
         if self.greedyPercent > Decimal('0'):
           for i in range(0, len(orders)):
-            if orders[i][0] == self.s1:
+            if orders[i].pair == self.s1:
               order = orders[i]
-              if orders[i][1] == 'buy':
-                print "Applying reducing greedy percent to price %s" % order[2]
-                orders[i] = (order[0], order[1], order[2] * self.greedyMultiplier, order[3])
-                print "Result: %s" % orders[i][2]
+              if order.orderType == 'buy':
+                print "Applying reducing greedy percent to price %s" % order.price
+                orders[i] = Order(order.pair, order.orderType, self.tradeAPI.FormatPrice(order.pair, order.price * self.greedyMultiplier), order.amount)
+                print "Result: %s" % orders[i].price
               elif order[1] == 'sell':
-                print "Applying increasing greedy percent to price %s" % order[2]
-                orders[i] = (order[0], order[1], order[2] / self.greedyMultiplier, order[3])
-                print "Result: %s" % order[2]
+                print "Applying increasing greedy percent to price %s" % order.price
+                orders[i] = Order(order.pair, order.orderType, self.tradeAPI.FormatPrice(order.pair, order.price / self.greedyMultiplier), order.amount)
+                print "Result: %s" % orders[i].price
 
         exchangeModel = arbmath.ExchangeModel(self.depths, self.tradeAPI)
         
         newBalance = copy.deepcopy(balance)
         for order in orders:
-          newBalance, pendingOrder = exchangeModel.ModelTrade(newBalance, *order)
+          newBalance, pendingOrder = exchangeModel.ModelTrade(newBalance, order.pair, order.orderType, order.price, order.amount)
         
         usdProfit = newBalance[self.s1] - balance[self.s1]
         
@@ -147,7 +148,7 @@ class TraderThread(QtCore.QThread):
         
         if not self.tradeTimer.isActive():
           if usdProfit > self.minProfit:
-            self.tradeAPI.EnqueueOrder(*order)
+            self.tradeAPI.EnqueueOrderA(order)
             
             print "Placing orders..."
             r1, r2, r3 = self.tradeAPI.PlacePendingOrders()
