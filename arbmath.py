@@ -8,6 +8,11 @@ class Order(object):
     self.orderType = op
     self.price = price
     self.amount = amount
+  def __repr__(self):
+    return "%s %s in %s at %s" % (self.orderType, self.amount, self.pair, self.price)
+  def __str__(self):
+    return self.__repr__()
+
 
 class ExchangeModel(object):
   def __init__(self, depths, tradeApi):
