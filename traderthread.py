@@ -114,11 +114,11 @@ class TraderThread(QtCore.QThread):
                 print "Applying reducing greedy percent to price %s" % order.price
                 orders[i] = Order(order.pair, order.orderType, self.tradeAPI.FormatPrice(order.pair, order.price * self.greedyMultiplier), order.amount)
                 print "Result: %s" % orders[i].price
-              elif order[1] == 'sell':
+              elif order.orderType == 'sell':
                 print "Applying increasing greedy percent to price %s" % order.price
                 orders[i] = Order(order.pair, order.orderType, self.tradeAPI.FormatPrice(order.pair, order.price / self.greedyMultiplier), order.amount)
                 print "Result: %s" % orders[i].price
-
+                
         exchangeModel = arbmath.ExchangeModel(self.depths, self.tradeAPI)
         
         newBalance = copy.deepcopy(balance)
