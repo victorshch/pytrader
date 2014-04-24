@@ -105,20 +105,7 @@ class TraderThread(QtCore.QThread):
       
       if orders:
         print "%s: Exploring arbitrage opportunity: %s" % (str(QtCore.QDateTime.currentDateTime().toString()), orders)
-        
-        if self.greedyPercent > Decimal('0'):
-          for i in range(0, len(orders)):
-            if orders[i].pair == self.p1:
-              order = orders[i]
-              if order.orderType == 'buy':
-                print "Applying reducing greedy percent to price %s" % order.price
-                orders[i] = Order(order.pair, order.orderType, self.tradeAPI.FormatPrice(order.pair, order.price * self.greedyMultiplier), order.amount)
-                print "Result: %s" % orders[i].price
-              elif order.orderType == 'sell':
-                print "Applying increasing greedy percent to price %s" % order.price
-                orders[i] = Order(order.pair, order.orderType, self.tradeAPI.FormatPrice(order.pair, order.price / self.greedyMultiplier), order.amount)
-                print "Result: %s" % orders[i].price
-                
+                        
         exchangeModel = arbmath.ExchangeModel(self.depths, self.tradeAPI)
         
         newBalance = copy.deepcopy(balance)
@@ -145,9 +132,25 @@ class TraderThread(QtCore.QThread):
         print "%s gain: %s" % (self.s3, s3Change)
         
         print "Overall profit: %s" % usdProfit
-        
+                
         if not self.tradeTimer.isActive():
           if usdProfit > self.minProfit:
+            if self.greedyPercent > Decimal('0'):
+              for i in range(0, len(orders)):
+                if orders[i].pair == self.p1:
+                  order = orders[i]
+                  if order.orderType == 'buy':
+                    print "Applying reducing greedy percent to price %s" % order.price
+                    orders[i] = Order(order.pair, order.orderType, self.tradeAPI.FormatPrice(order.pair, order.price * self.greedyMultiplier), order.amount)
+                    print "Result: %s" % orders[i].price
+                    break
+                  elif order.orderType == 'sell':
+                    print "Applying increasing greedy percent to price %s" % order.price
+                    orders[i] = Order(order.pair, order.orderType, self.tradeAPI.FormatPrice(order.pair, order.price / self.greedyMultiplier), order.amount)
+                    print "Result: %s" % orders[i].price
+                    break
+
+            
             for order in orders:
               self.tradeAPI.EnqueueOrderA(order)
             
